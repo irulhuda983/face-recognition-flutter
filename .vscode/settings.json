@@ -1,0 +1,17 @@
+{
+    // Auto save config
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 500,
+    // Dart & Flutter Settings
+    "dart.flutterHotReloadOnSave": true,
+    "dart.flutterHotRestartOnSave": false,
+    "dart.lineLength": 100,
+    "dart.enableSdkFormatter": true,
+    // Format on save
+    "editor.formatOnSave": true,
+    // Optional: show status messages in terminal
+    "dart.showDartDevToolsInspectorNotifications": false,
+    "dart.showStructuredErrors": true,
+    // Improve performance on large apps
+    "search.followSymlinks": false
+}
