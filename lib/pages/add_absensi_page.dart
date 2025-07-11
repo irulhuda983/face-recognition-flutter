@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -35,6 +37,8 @@ class _AddAbsensiPageState extends State<AddAbsensiPage> {
   bool _isCameraInitialized = false;
 
   String _messageText = '';
+
+  Timer? _timer;
 
   @override
   void initState() {
@@ -117,6 +121,23 @@ class _AddAbsensiPageState extends State<AddAbsensiPage> {
     }
   }
 
+  startTimer() {
+    print('START TIMER');
+    setState(() {
+      _messageText = 'Tahan 5 detik untuk absen';
+    });
+    _timer = Timer(Duration(seconds: 5), () async {
+      print('TIMER RUNNING FINISHED');
+      // This runs after 5 seconds
+      if (_cameraController != null) {
+        setState(() {
+          _messageText = 'mengabil foto';
+        });
+        await _captureAndSaveImage(_cameraController!);
+      }
+    });
+  }
+
   Future<void> _processImage(InputImage inputImage) async {
     if (!_canProcess || _isBusy) return;
     _isBusy = true;
@@ -133,39 +154,50 @@ class _AddAbsensiPageState extends State<AddAbsensiPage> {
 
     if (faces.isNotEmpty) {
       if (faces.length == 1) {
+        print('JFACE DETECT');
         // if (!mounted) return;
-        setState(() {
-          isDetectFace = true;
-          _messageText = 'Muka ditemukan';
-        });
 
-        await Future.delayed(Duration(seconds: 2));
-        // if (!mounted) return;
-        setState(() {
-          _messageText = 'Tahan 5 detik untuk absen';
-        });
-
-        await Future.delayed(Duration(seconds: 5));
-        // if (!mounted) return;
-        setState(() {
-          _messageText = 'mengabil foto';
-        });
-        if (_cameraController != null) {
-          await _captureAndSaveImage(_cameraController!);
+        if ((_timer?.isActive ?? false)) {
+          setState(() {
+            isDetectFace = true;
+            _messageText = 'Muka ditemukan';
+          });
+        } else {
+          startTimer();
         }
+
+        // await Future.delayed(Duration(seconds: 2));
+        // if (!mounted) return;
+
+        // await Future.delayed(Duration(seconds: 5));
+        // if (!mounted) return;
+
+        // if (_cameraController != null) {
+        //   await _captureAndSaveImage(_cameraController!);
+        // }
       } else {
         // if (!mounted) return;
+        print('JFACES');
         setState(() {
           isDetectFace = false;
           _messageText = 'Pastikan wajah tidak lebih dari 1';
         });
+        if (_timer?.isActive ?? false) {
+          print('CANCEL TIMER');
+          _timer?.cancel();
+        }
       }
     } else {
+      print('JFACE NULL');
       // if (!mounted) return;
       setState(() {
         isDetectFace = false;
         _messageText = 'Wajah tidak ditemukan';
       });
+      if (_timer?.isActive ?? false) {
+        print('CANCEL TIMER');
+        _timer?.cancel();
+      }
     }
 
     _isBusy = false;
